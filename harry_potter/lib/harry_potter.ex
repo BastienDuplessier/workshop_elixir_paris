@@ -16,7 +16,59 @@ defmodule HarryPotter do
   Potter books. Your mission is to write a piece of code to calculate the price of any conceivable shopping basket,
   giving as big a discount as possible.
   """
+  @price 8
+  @discount %{1 => 1, 2 => 0.95, 3 => 0.9, 4 => 0.8, 5 => 0.75}
 
-  def price(_) do
+  def price([]), do: 0
+
+  def price(list) do
+    tab = group_books(list)
+
+    Enum.reduce(tab, 0, fn set, total ->
+      set_price(set) + total
+    end)
+
+    # Enum.reduce(tab, fn set, total ->
+    #   IO.inspect("foo")
+    #   IO.inspect(set)
+    #   IO.inspect(total)
+    #   set_price(set) + total
+    # end)
+  end
+
+  def set_price([]), do: 0
+
+  def set_price(list) do
+    count = length(list)
+    count * @price * @discount[count]
+  end
+
+  # group_books([0]) => [[0]]
+  # group_books([0,0]) => [[0], [0]]
+  # group_books([0,0,1]) => [[0,1], [0]]
+  # group_books([0,0,1,2]) => [[0,1,2], [0]]
+  # group_books([0,0,1,2,2,3,4]) => [[0,1,2,3,4], [0,2]]
+  # HarryPotter.group_books([0, 0, 1, 1, 2, 2, 3, 4]) => [[0,1,2,3,4], [0,1,2]]
+  def group_books([]), do: []
+
+  def group_books(list) do
+    list
+    |> Enum.reduce([[]], fn tome, set_list ->
+      # Find index
+      index =
+        Enum.find_index(set_list, fn tome_list ->
+          !(tome in tome_list)
+        end)
+
+      if index != nil do
+        # Modify tome_list
+        tome_list = set_list |> Enum.at(index)
+        tome_list = [tome | tome_list]
+        # Change set_list
+        List.replace_at(set_list, index, tome_list)
+      else
+        set_list ++ [[tome]]
+      end
+    end)
   end
 end
